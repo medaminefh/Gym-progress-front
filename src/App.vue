@@ -11,30 +11,58 @@ const state = ref({
   maxWeight: 0
 })
 
+const btnState = ref({
+  text: 'Pick',
+  color: 'bg-blue-500 hover:bg-blue-700'
+})
+
 let formData = new FormData()
 
 const handelNext = async () => {
   if (state.value.steps == 1) {
     // submit the form
+    btnState.value = {
+      text: 'Loading...',
+      color: 'bg-blue-400 hover:bg-blue-400'
+    }
     console.log(state.value)
 
     try {
-      const res = await fetch('https://gym-progress.onrender.com/api/upload', {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/upload`, {
         method: 'POST',
-        body: formData
+        body: JSON.stringify({
+          files: formData,
+          state: state.value
+        })
       })
       const jsonData = await res.json()
+      btnState.value = {
+        text: 'Submitted',
+        color: 'bg-blue-500 hover:bg-blue-700'
+      }
       console.log({ jsonData })
     } catch (error) {
+      btnState.value = {
+        text: 'Error',
+        color: 'bg-red-400 hover:bg-red-400'
+      }
       console.log('Some err', error)
     }
 
     return
   }
+  btnState.value = {
+    text: 'Submit',
+    color: 'bg-blue-500 hover:bg-blue-700'
+  }
   state.value.steps += 1
 }
 
 const handelPrev = () => {
+  btnState.value = {
+    text: 'Pick',
+    color: 'bg-blue-500 hover:bg-blue-700'
+  }
   state.value.steps -= 1
 }
 
@@ -239,10 +267,11 @@ const dragoverHandler = (event: DragEvent) => {
       :disabled="state.selected.length === 0"
       :class="[
         state.selected.length === 0 ? 'bg-blue-200 hover:bg-blue-200' : '',
-        'bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline'
+        'text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
+        btnState.color
       ]"
     >
-      {{ state.steps == 0 ? 'Pick' : 'Submit' }}
+      {{ btnState.text }}
     </button>
   </div>
 </template>
