@@ -250,7 +250,7 @@ const dragoverHandler = (event: DragEvent) => {
               <div v-for="img in state.photos" :key="img" class="relative w-24 h-24">
                 <button
                   type="button"
-                  class="absolute top-0 right-1 font-bold text-xl text-white"
+                  class="absolute top-0 right-1 font-lg text-lg w-6 h-6 bg-black flex justify-center items-center border border-black rounded-full text-white"
                   @click="deleteImg(img)"
                 >
                   X
