@@ -1,4 +1,5 @@
 <script setup lang="ts">
+// @ts-nocheck
 import { ref } from 'vue'
 
 const state = ref({
@@ -10,10 +11,23 @@ const state = ref({
   maxWeight: 0
 })
 
-const handelNext = () => {
+let formData = new FormData()
+
+const handelNext = async () => {
   if (state.value.steps == 1) {
     // submit the form
     console.log(state.value)
+
+    try {
+      const res = await fetch('https://gym-progress.onrender.com/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+      const jsonData = await res.json()
+      console.log({ jsonData })
+    } catch (error) {
+      console.log('Some err', error)
+    }
 
     return
   }
@@ -25,13 +39,32 @@ const handelPrev = () => {
 }
 
 const imageUploaded = (e: Event) => {
-  for (let i = 0; i < (e.target as any).files.length; i++) {
-    state.value.photos.push(URL.createObjectURL(e.target.files[i]))
+  for (let i = 0; i < (e.target as HTMLButtonElement).files.length; i++) {
+    state.value.photos.push(URL.createObjectURL(e.target?.files[i]))
+    formData.append('file', e.target!.files[i])
   }
 }
 
 const deleteImg = (img: string) => {
   state.value.photos = state.value.photos.filter((src) => src !== img)
+}
+
+const dropHandler = (event: DragEvent) => {
+  console.log('Dropped', event)
+  // Prevent default behavior (Prevent file from being opened)
+  event.preventDefault()
+  // Use DataTransfer interface to access the file(s)
+  ;[...event.dataTransfer!.files].forEach((file, i) => {
+    if (file.type.match('image')) {
+      state.value.photos.push(URL.createObjectURL(file))
+      formData.append('file', file)
+    }
+  })
+}
+
+const dragoverHandler = (event: DragEvent) => {
+  // Prevent default behavior (Prevent file from being opened)
+  event.preventDefault()
 }
 </script>
 
@@ -148,7 +181,11 @@ const deleteImg = (img: string) => {
               for="photos"
               class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600"
             >
-              <div class="flex flex-col items-center justify-center pt-5 pb-6">
+              <div
+                class="flex flex-col items-center justify-center pt-5 pb-6"
+                @drop="dropHandler($event)"
+                @dragover="dragoverHandler($event)"
+              >
                 <svg
                   aria-hidden="true"
                   class="w-10 h-10 mb-3 text-gray-400"
