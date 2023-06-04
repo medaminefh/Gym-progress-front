@@ -30,10 +30,7 @@ const handelNext = async () => {
     try {
       const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/upload`, {
         method: 'POST',
-        body: JSON.stringify({
-          files: formData,
-          state: state.value
-        })
+        body: formData
       })
       const jsonData = await res.json()
       btnState.value = {
@@ -264,10 +261,10 @@ const dragoverHandler = (event: DragEvent) => {
     </div>
     <button
       @click="handelNext"
-      :disabled="state.selected.length === 0"
+      :disabled="state.selected.length === 0 || btnState.text === 'Submitted'"
       :class="[
-        state.selected.length === 0 ? 'bg-blue-200 hover:bg-blue-200' : '',
-        'text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline',
+        'text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-blue-200',
+        state.selected.length === 0 ? 'bg-blue-200' : '',
         btnState.color
       ]"
     >
